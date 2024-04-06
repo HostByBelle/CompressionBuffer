@@ -1,0 +1,5 @@
+{
+    "require": {
+        "asispts/http-accept": "^1.0"
+    }
+}
