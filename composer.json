@@ -1,5 +1,18 @@
 {
-    "require": {
-        "asispts/http-accept": "^1.0"
+  "require": {
+    "asispts/http-accept": "^1.0"
+  },
+  "suggest": {
+    "ext-brotli": "For brotli output compression",
+    "ext-zstd": "For zstd output compression",
+    "ext-zlib": "For gzip & deflate output compression"
+  },
+  "autoload": {
+    "psr-4": {
+      "HostByBelle\\": "src/"
     }
+  },
+  "config": {
+    "sort-packages": true
+  }
 }
