@@ -28,10 +28,10 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      - run: tree
+
       - name: Install dependencies
-        run: |
-            ls
-            composer install --prefer-dist
+        run: composer install --prefer-dist
 
       - name: Run PHPStan
         run: php vendor/bin/phpstan analyse src
