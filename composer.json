@@ -9,7 +9,7 @@
   },
   "autoload": {
     "psr-4": {
-      "HostByBelle\\": "src/"
+      "HostByBelle\\": "src/HostByBelle"
     }
   },
   "config": {
