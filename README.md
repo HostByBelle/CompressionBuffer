@@ -1,6 +1,6 @@
 # CompressionBuffer
 
-CompressionBuffer provides easy access to zstd, brotli, and gzip output buffering with PHP on **any** webserver. You can even get zstd output compression with the PHP development server.
+CompressionBuffer provides easy access to zstd, brotli, and gzip output buffering with PHP on **any** webserver. You can even get zstd [output compression with the PHP development server](https://www.daniel.priv.no/tools/zstd-browser-test/).
 
 ## Requirements
 

@@ -1,6 +1,17 @@
 {
+  "name": "hostbybelle/compressionbuffer",
+  "description": "CompressionBuffer provides easy access to zstd, brotli, and gzip output buffering with PHP on any webserver.",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Belle Aerni",
+      "email": "belleaerni@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
   "require": {
-    "asispts/http-accept": "^1.0"
+    "asispts/http-accept": "^1.0",
+    "php": ">=8.0"
   },
   "suggest": {
     "ext-brotli": "For brotli output compression",

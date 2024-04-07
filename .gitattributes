@@ -1,0 +1,9 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+/.github export-ignore
+/tests export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/composer.lock export-ignore
+/index.php export-ignore
+/misc export-ignore
