@@ -29,7 +29,9 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist
+        run: |
+            ls
+            composer install --prefer-dist
 
       - name: Run PHPStan
         run: php vendor/bin/phpstan analyse src
