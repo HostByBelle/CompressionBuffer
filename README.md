@@ -1,3 +1,5 @@
+![PHPStan Level](https://img.shields.io/badge/PHPStan-level%209-brightgreen)
+
 # CompressionBuffer
 
 CompressionBuffer provides easy access to `zstd`, `brotli`, and `gzip` output buffering with PHP on **any** web server. You can even get zstd [output compression with the PHP development server](https://github.com/HostByBelle/CompressionBuffer/blob/main/misc/zstd-php-dev-server.png).

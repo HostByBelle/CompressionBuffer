@@ -12,6 +12,7 @@ use HttpAccept\AcceptEncodingParser;
 
 class CompressionBuffer
 {
+    /** @var array<string,int> */
     private static array $compressionPriority = [
         'zstd' => 1,
         'br' => 2,
@@ -23,6 +24,8 @@ class CompressionBuffer
     private static bool $attemptMultiple = false;
     private static bool $respectPreferred = true;
     private static bool $doCompression = true;
+
+    /** @var array<string> */
     private static array $tryOrder = [];
 
     /**
@@ -56,7 +59,7 @@ class CompressionBuffer
      * @param bool $respectPreferred (optional) If you want CompressionBuffer to use the client's defined order of preference for compression methods. Otherwise, they are tried based on effectiveness.
      * @param bool $attemptMultiple (optional) indicates if CompressionBuffer should attempt other compression methods after an error. Otherwise, it'll default to no compression.
      */
-    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = false)
+    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = false): void
     {
         self::$respectPreferred = $respectPreferred;
         self::$attemptMultiple = $attemptMultiple;
@@ -99,7 +102,7 @@ class CompressionBuffer
     /**
      * Parses the accept encoding header and builds an internal list of compression methods to attempt based on compatibility & priority.
      */
-    private static function setTryOrder()
+    private static function setTryOrder(): void
     {
         if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && is_string($_SERVER['HTTP_ACCEPT_ENCODING'])) {
             $encodings = (new AcceptEncodingParser())->parse($_SERVER['HTTP_ACCEPT_ENCODING']);
@@ -144,7 +147,7 @@ class CompressionBuffer
     /**
      * Checks if the current server can do a certain type of encoding (compression)
      */
-    private static function canDo(string $encoding)
+    private static function canDo(string $encoding): bool
     {
         return match ($encoding) {
             'zstd' => function_exists('zstd_compress'),
