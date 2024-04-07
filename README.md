@@ -1,4 +1,6 @@
 ![PHPStan Level](https://img.shields.io/badge/PHPStan-level%209-brightgreen)
+![Packagist Downloads](https://img.shields.io/packagist/dt/HostByBelle/CompressionBuffer)
+![Packagist Version](https://img.shields.io/packagist/v/HostByBelle/CompressionBuffer)
 
 # CompressionBuffer
 
