@@ -15,3 +15,5 @@ jobs:
         with:
           php_extensions: brotli zstd zlib
       - uses: php-actions/phpstan@v3
+        with:
+          path: src
