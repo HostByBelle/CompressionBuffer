@@ -1,4 +1,5 @@
 <?php
+
 function compressWithGzip(string $data, int $level)
 {
     return gzencode($data, $level, ZLIB_ENCODING_GZIP);
@@ -14,11 +15,11 @@ function compressWithBrotli(string $data, int $level)
     return brotli_compress($data, $level);
 }
 
-function testGzip()
+function testGzip($file)
 {
     $level = 1;
     $max = 9;
-    $originalData = file_get_contents('war_and_peace.html');
+    $originalData = file_get_contents($file);
     $originalLength = strlen($originalData);
 
     echo '----GZIP----' . PHP_EOL;
@@ -33,11 +34,11 @@ function testGzip()
     }
 }
 
-function testZstd()
+function testZstd($file)
 {
     $level = 1;
     $max = 19;
-    $originalData = file_get_contents('war_and_peace.html');
+    $originalData = file_get_contents($file);
     $originalLength = strlen($originalData);
 
     echo '----zstd----' . PHP_EOL;
@@ -52,11 +53,11 @@ function testZstd()
     }
 }
 
-function testBrotli()
+function testBrotli($file)
 {
     $level = 1;
     $max = 11;
-    $originalData = file_get_contents('war_and_peace.html');
+    $originalData = file_get_contents($file);
     $originalLength = strlen($originalData);
 
     echo '----Brotli----' . PHP_EOL;
@@ -71,6 +72,8 @@ function testBrotli()
     }
 }
 
-testGzip();
-testZstd();
-testBrotli();
+$testFile = 'war_and_peace.html'; 
+
+testGzip($testFile);
+testZstd($testFile);
+testBrotli($testFile);

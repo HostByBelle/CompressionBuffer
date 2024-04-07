@@ -16,17 +16,27 @@ class CompressionBuffer
         'identity' => 5,
     ];
 
-    private static bool $attemptMultiple = true;
+    private static bool $attemptMultiple = false;
     private static bool $respectPreferred = true;
     private static array $tryOrder = [];
 
-    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = true)
+    /**
+     * Must be called so CompressionBuffer can perform the needed checks and setup.
+     * Once called, it will automatically find compatible compression methods for the client & server before then sorting them in a logical try order. 
+     * 
+     * @param bool $respectPreferred (optional) If you want CompressionBuffer to use the client's defined order of preference for compression methods. Otherwise, they are tried based on effectiveness.
+     * @param bool $attemptMultiple (optional) indicates if CompressionBuffer should attempt other compression methods after an error. Otherwise, it'll default to no compression.
+     */
+    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = false)
     {
         self::$respectPreferred = $respectPreferred;
         self::$attemptMultiple = $attemptMultiple;
         self::setTryOrder();
     }
 
+    /**
+     * The actual handler that should be handed to ob_start()
+     */
     public static function handler(string $buffer, int $phase): string
     {
         if ($phase & PHP_OUTPUT_HANDLER_FINAL || $phase & PHP_OUTPUT_HANDLER_END) {
@@ -34,21 +44,28 @@ class CompressionBuffer
                 try {
                     $compressed = self::doCompression($encoding, $buffer);
                     header('Content-Encoding: ' . $encoding);
+                    header('Vary: Accept-Encoding');
                     return $compressed;
                 } catch (\Exception $e) {
                     if (self::$attemptMultiple) {
                         continue;
+                    } else {
+                        break;
                     }
                 }
             }
 
             header('Content-Encoding: identity');
+            header('Vary: Accept-Encoding');
             return $buffer;
         }
 
         return $buffer;
     }
 
+    /**
+     * Parses the accept encoding header and builds an internal list of compression methods to attempt based on compatibility & priority.
+     */
     private static function setTryOrder()
     {
         if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && is_string($_SERVER['HTTP_ACCEPT_ENCODING'])) {
@@ -91,6 +108,9 @@ class CompressionBuffer
         }
     }
 
+    /**
+     * Checks if the current server can do a certain type of encoding (compression)
+     */
     private static function canDo(string $encoding)
     {
         return match ($encoding) {
@@ -102,13 +122,18 @@ class CompressionBuffer
         };
     }
 
+    /**
+     * Does the actual compression.
+     * 
+     * @throws \Exception if an error occurs during compression to allow for the system to try the next one.
+     */
     private static function doCompression(string $encoding, string $buffer): string
     {
         $result = match ($encoding) {
-            'zstd' => zstd_compress($buffer),
-            'br' => brotli_compress($buffer),
-            'gzip' => gzencode($buffer, -1, ZLIB_ENCODING_GZIP),
-            'deflate' => gzencode($buffer, -1, ZLIB_ENCODING_DEFLATE),
+            'zstd' => zstd_compress($buffer, 3),
+            'br' => brotli_compress($buffer, 3),
+            'gzip' => gzencode($buffer, 4, ZLIB_ENCODING_GZIP),
+            'deflate' => gzencode($buffer, 4, ZLIB_ENCODING_DEFLATE),
             'identity' => $buffer,
             default => false,
         };
