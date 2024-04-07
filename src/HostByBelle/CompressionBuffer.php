@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Copyright 2024 HostByBelle
+ */
+
 declare(strict_types=1);
 
 namespace HostByBelle;
@@ -18,7 +22,32 @@ class CompressionBuffer
 
     private static bool $attemptMultiple = false;
     private static bool $respectPreferred = true;
+    private static bool $doCompression = true;
     private static array $tryOrder = [];
+
+    /**
+     * Enables output compression
+     */
+    public static function enable(): void
+    {
+        self::$doCompression = true;
+    }
+
+    /**
+     * Disables output compression
+     */
+    public static function disable(): void
+    {
+        self::$doCompression = false;
+    }
+
+    /**
+     * Used to check if output compression is enabled or disabled
+     */
+    public static function isEnabled(): bool
+    {
+        return self::$doCompression;
+    }
 
     /**
      * Must be called so CompressionBuffer can perform the needed checks and setup.
@@ -40,6 +69,10 @@ class CompressionBuffer
     public static function handler(string $buffer, int $phase): string
     {
         if ($phase & PHP_OUTPUT_HANDLER_FINAL || $phase & PHP_OUTPUT_HANDLER_END) {
+            if (!self::$doCompression) {
+                return $buffer;
+            }
+
             foreach (self::$tryOrder as $encoding) {
                 try {
                     $compressed = self::doCompression($encoding, $buffer);

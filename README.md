@@ -1,19 +1,27 @@
 # CompressionBuffer
 
-CompressionBuffer provides easy access to zstd, brotli, and gzip output buffering with PHP on **any** webserver. You can even get zstd [output compression with the PHP development server](https://www.daniel.priv.no/tools/zstd-browser-test/).
+CompressionBuffer provides easy access to `zstd`, `brotli`, and `gzip` output buffering with PHP on **any** web server. You can even get zstd [output compression with the PHP development server](https://github.com/HostByBelle/CompressionBuffer/blob/main/misc/zstd-php-dev-server.png).
+
+## Features
+
+- Respects the `Accept-Encoding` header sent by the client, including the specified priority for each compression method.
+- Allows `zstd`, `brotli`, `gzip` and `deflate` compression methods to be used on any web server.
+- All included compression methods have been benchmarked with compression levels carefully selected for the ideal balance between speed and size reduction.
+- Auto-selects the compression method based on client headers and available PHP extensions.
+- Automatically sends the appropriate headers.
 
 ## Requirements
 
+- A PHP application using output buffering.
 - `PHP 8.0` or greater.
 - `ext-brotli` if you want brotli compression.
 - `ext-zstd`if you want zstd compression.
 - `ext-zlib` if you want gzip / deflate compression.
 
-CompressionBuffer will automatically pick the best possible compression method based on the client's `Accept-Encoding` header and installed extensions with no extra configuration required.
-
 ## Installation & Usage
 
 Install via composer:
+_Note_: CompressionBuffer isn't quite yet released, you'll have to use the `main` dev branch specifically.
 
 ```bash
 composer install hostbybelle/compressionbuffer
@@ -35,6 +43,14 @@ echo "Lorem ipsum dolor sit amet, consectetur adipiscing elit,";
 
 // Finally send it to the browser & let CompressionBuffer do it's magic.
 ob_end_flush();
+```
+
+Toggling CompressionBuffer's status:
+
+```PHP
+CompressionBuffer::enable(); // Enable output compression (enabled by default)
+CompressionBuffer::disable(); // Disable output compression
+CompressionBuffer::isEnabled(); // Check if it's currently enabled or not
 ```
 
 ## Compression Method Tests & Results
