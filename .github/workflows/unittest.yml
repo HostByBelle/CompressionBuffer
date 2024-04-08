@@ -41,14 +41,14 @@ jobs:
       - name: Test gzip
         run: |
             output=$(curl localhost:8000 -s -H "Accept-Encoding: gzip" | gzip -d -)
-            if [ ! "$output" == "Hello, world!" ]; exit 1
+            if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
 
       - name: Test brotli
         run: |
             output=$(curl localhost:8000 -s -H "Accept-Encoding: br" | brotli -d -)
-            if [ ! "$output" == "Hello, world!" ]; exit 1
+            if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
 
       - name: Test zstd
         run: |
             output=$(curl localhost:8000 -s -H "Accept-Encoding: zstd" | zstd -d -)
-            if [ ! "$output" == "Hello, world!" ]; exit 1
+            if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
