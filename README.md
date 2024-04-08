@@ -40,7 +40,7 @@ use HostByBelle\CompressionBuffer;
 require 'vendor/autoload.php';
 
 CompressionBuffer::setUp(); // Have compressionBuffer detect & sort the compression methods
-ob_start(CompressionBuffer::handler(...)); // Register it
+ob_start([CompressionBuffer::class, 'handler']); // Register it
 
 // Send some content to the output buffer
 echo "Lorem ipsum dolor sit amet, consectetur adipiscing elit,";
@@ -73,4 +73,4 @@ The results of our testing can be found [here on Google Sheets](https://docs.goo
 
 - `zstd`: Level 3. Level 4 would also be a good option as it will still be faster than the rest, however at level 3 `zstd` far exceeds the other options for speed while matching them in overall compression level and level 4 is only 38% the speed of level 3 for for only .4% more compression.
 - `brotli`: Level 3. Level 4 does come with a noticeable increase to compression level, but does so in 3x the time. At level 3 brotli provides a similar compression level to `gzip`, but at around 4.5x the speed.
-- `gzip`: Level 6 as this is the point at which it's speed to compression ratio plateaus.
+- `gzip`: Level 4 was chosen as it's the highest level before gzip's speed quickly drops off to nearly unusable levels. This does come at a slight cost to overall compression level, but helps keep application response times quick.

@@ -67,9 +67,12 @@ class CompressionBuffer
     }
 
     /**
-     * The actual handler that should be handed to ob_start()
+     * The actual handler that should be handed to ob_start().
+     * You may use this outside of ob_start by calling it directly and not specifying the phase.
+     * 
+     * @return string the compressed output buffer
      */
-    public static function handler(string $buffer, int $phase): string
+    public static function handler(string $buffer, int $phase = PHP_OUTPUT_HANDLER_FINAL): string
     {
         if ($phase & PHP_OUTPUT_HANDLER_FINAL || $phase & PHP_OUTPUT_HANDLER_END) {
             if (!self::$doCompression) {
