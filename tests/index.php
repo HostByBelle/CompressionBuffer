@@ -2,11 +2,11 @@
 
 use HostByBelle\CompressionBuffer;
 
-require 'vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 CompressionBuffer::setUp();
 ob_start([CompressionBuffer::class, 'handler']);
 
-echo "If you can read this, it works!";
+echo "Hello, world!";
 
 ob_end_flush();
