@@ -11,12 +11,12 @@ jobs:
 
     strategy:
       matrix:
-        php-version: ["8.0", "8.1", "8.2", "8.4"]
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
 
     name: PHP ${{ matrix.php-version }} tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -30,7 +30,7 @@ jobs:
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
@@ -51,6 +51,7 @@ jobs:
       - name: Test with content encoding
         run: |
           for encoding in gzip brotli zstd; do
+            echo "Testing ${encoding}".
             output=$(curl localhost:8000 -s -H "Accept-Encoding: ${encoding}" | ${encoding} -d -)
             if [ ! "$output" == "Hello, world!" ]; then
               echo "Encoding: ${encoding} did not work correctly."
