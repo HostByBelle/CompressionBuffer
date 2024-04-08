@@ -195,7 +195,7 @@ class CompressionBuffer
     /**
      * Sends headers to the client. Will use the custom header handler if set, otherwise PHP's header function.
      */
-    private static function sendHeader(string $name, mixed $value): void
+    private static function sendHeader(string $name, string|int $value): void
     {
         if (is_callable(self::$headerHandler)) {
             call_user_func(self::$headerHandler, $name, $value);
