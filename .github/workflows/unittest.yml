@@ -51,8 +51,12 @@ jobs:
       - name: Test with content encoding
         run: |
           for encoding in gzip brotli zstd; do
-            echo "Testing ${encoding}".
-            output=$(curl localhost:8000 -s -H "Accept-Encoding: ${encoding}" | ${encoding} -d -)
+            echo "Testing ${encoding}:"
+            if [ "$encoding" == "brotli" ]; then
+              output=$(curl localhost:8000 -s -H "Accept-Encoding: br" | brotli -d -)
+            else
+              output=$(curl localhost:8000 -s -H "Accept-Encoding: ${encoding}" | ${encoding} -d -)
+            fi
             if [ ! "$output" == "Hello, world!" ]; then
               echo "Encoding: ${encoding} did not work correctly."
               exit 1
