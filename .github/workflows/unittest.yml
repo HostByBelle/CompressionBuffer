@@ -6,16 +6,23 @@ on:
   pull_request:
 
 jobs:
-  build-test:
+  unittests:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
+
+    name: PHP ${{ matrix.php-version }} tests
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
-          extensions: brotli zstd zlib
+          php-version: ${{ matrix.php-version }}
+          extensions: brotli, zstd, zlib
           tools: composer
 
       - name: Get composer cache directory
@@ -31,25 +38,66 @@ jobs:
 
       - name: Install dependencies
         run: |
-            composer install --prefer-dist
-            sudo apt-get install brotli zstd gzip -y
+          composer install --prefer-dist
+          sudo apt-get update -y
+          sudo apt-get install brotli zstd gzip -y
+
+      - run: php -m
 
       - name: Start the server
         working-directory: tests
         run: nohup php -S localhost:8000 &
 
-      - name: Test gzip
+      - name: Test with content encoding
         run: |
-            output=$(curl localhost:8000 -s -H "Accept-Encoding: gzip" | gzip -d -)
-            if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
+          for encoding in gzip brotli zstd; do
+            echo "Testing ${encoding}:"
+            if [ "$encoding" == "brotli" ]; then
+              output=$(curl localhost:8000 -s -H "Accept-Encoding: br" | brotli -d -)
+            else
+              output=$(curl localhost:8000 -s -H "Accept-Encoding: ${encoding}" | ${encoding} -d -)
+            fi
+            if [ ! "$output" == "Hello, world!" ]; then
+              echo "Encoding: ${encoding} did not work correctly."
+              exit 1
+            fi
+          done
 
-      - name: Test brotli
+      - name: Test identity
         run: |
-            output=$(curl localhost:8000 -s -H "Accept-Encoding: br" | brotli -d -)
-            if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
+          output=$(curl localhost:8000 -s -H "Accept-Encoding: *")
+          if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
 
-      # TODO: zstd appears to not be installed / loaded in PHP
-      #- name: Test zstd
-      #  run: |
-      #      output=$(curl localhost:8000 -s -H "Accept-Encoding: zstd" | zstd -d -)
-      #      if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
+          output=$(curl localhost:8000 -s -H "Accept-Encoding: identity")
+          if [ ! "$output" == "Hello, world!" ]; then exit 1; fi
+
+  phpstan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: brotli, zstd, zlib
+          tools: composer
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
+
+      - name: Run PHPStan
+        run: php vendor/bin/phpstan analyse src --level 9

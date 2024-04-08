@@ -25,6 +25,9 @@ class CompressionBuffer
     private static bool $respectPreferred = true;
     private static bool $doCompression = true;
 
+    /** @var null|callable */
+    private static mixed $headerHandler = null;
+
     /** @var array<string> */
     private static array $tryOrder = [];
 
@@ -54,36 +57,42 @@ class CompressionBuffer
 
     /**
      * Must be called so CompressionBuffer can perform the needed checks and setup.
-     * Once called, it will automatically find compatible compression methods for the client & server before then sorting them in a logical try order. 
-     * 
+     * Once called, it will automatically find compatible compression methods for the client & server before then sorting them in a logical try order.
+     *
      * @param bool $respectPreferred (optional) If you want CompressionBuffer to use the client's defined order of preference for compression methods. Otherwise, they are tried based on effectiveness.
-     * @param bool $attemptMultiple (optional) indicates if CompressionBuffer should attempt other compression methods after an error. Otherwise, it'll default to no compression.
+     * @param bool $attemptMultiple (optional) Indicates if CompressionBuffer should attempt other compression methods after an error. Otherwise, it'll default to no compression.
+     * @param null|callable $headerHandler (optional) Optionally provide a callable function here which will be called to send headers. The first parameter must be the header name and the second must be the value.
      */
-    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = false): void
+    public static function setUp(bool $respectPreferred = true, bool $attemptMultiple = false, ?callable $headerHandler = null): void
     {
         self::$respectPreferred = $respectPreferred;
         self::$attemptMultiple = $attemptMultiple;
+        self::$headerHandler = $headerHandler;
         self::setTryOrder();
     }
 
     /**
      * The actual handler that should be handed to ob_start().
      * You may use this outside of ob_start by calling it directly and not specifying the phase.
-     * 
-     * @return string the compressed output buffer
+     *
+     * @return string the compressed output buffer, ready to be sent to the client.
      */
     public static function handler(string $buffer, int $phase = PHP_OUTPUT_HANDLER_FINAL): string
     {
         if ($phase & PHP_OUTPUT_HANDLER_FINAL || $phase & PHP_OUTPUT_HANDLER_END) {
+            // Send needed headers for caching
+            self::sendHeader('Vary', 'Accept-Encoding');
+
             if (!self::$doCompression) {
                 return $buffer;
             }
 
+            // Attempt the compatible compression method(s) 
             foreach (self::$tryOrder as $encoding) {
                 try {
                     $compressed = self::doCompression($encoding, $buffer);
-                    header('Content-Encoding: ' . $encoding);
-                    header('Vary: Accept-Encoding');
+                    self::sendHeader('Content-Encoding', $encoding);
+                    self::sendHeader('Vary', 'Accept-Encoding');
                     return $compressed;
                 } catch (\Exception $e) {
                     if (self::$attemptMultiple) {
@@ -94,9 +103,8 @@ class CompressionBuffer
                 }
             }
 
-            header('Content-Encoding: identity');
-            header('Vary: Accept-Encoding');
-            return $buffer;
+            // We will return the original uncompressed content next, so tag the encoding as "identity"
+            self::sendHeader('Content-Encoding', 'identity');
         }
 
         return $buffer;
@@ -163,7 +171,7 @@ class CompressionBuffer
 
     /**
      * Does the actual compression.
-     * 
+     *
      * @throws \Exception if an error occurs during compression to allow for the system to try the next one.
      */
     private static function doCompression(string $encoding, string $buffer): string
@@ -182,5 +190,17 @@ class CompressionBuffer
         }
 
         return $result;
+    }
+
+    /**
+     * Sends headers to the client. Will use the custom header handler if set, otherwise PHP's header function.
+     */
+    private static function sendHeader(string $name, string|int $value): void
+    {
+        if (is_callable(self::$headerHandler)) {
+            call_user_func(self::$headerHandler, $name, $value);
+        } else {
+            header("$name: $value");
+        }
     }
 }

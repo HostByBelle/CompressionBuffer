@@ -1,4 +1,5 @@
 ![PHPStan Level](https://img.shields.io/badge/PHPStan-level%209-brightgreen)
+[![Unit Tests](https://github.com/HostByBelle/CompressionBuffer/actions/workflows/unittest.yml/badge.svg)](https://github.com/HostByBelle/CompressionBuffer/actions/workflows/unittest.yml)
 ![Packagist Downloads](https://img.shields.io/packagist/dt/HostByBelle/CompressionBuffer)
 ![Packagist Version](https://img.shields.io/packagist/v/HostByBelle/CompressionBuffer)
 
