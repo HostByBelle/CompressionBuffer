@@ -50,10 +50,14 @@ function testZstd($data)
     }
 }
 
-function testBrotli($data)
+function testBrotli($data, bool $useTextMode = false)
 {
     echo PHP_EOL . PHP_EOL;
-    echo '----Brotli----' . PHP_EOL;
+    if ($useTextMode) {
+        echo '----Brotli (Text Mode)----' . PHP_EOL;
+    } else {
+        echo '----Brotli (Generic Mode)----' . PHP_EOL;
+    }
     echo 'Level, Reduction, Time, Percent Per Millisecond' . PHP_EOL;
 
     if (!function_exists('brotli_compress')) {
@@ -67,7 +71,7 @@ function testBrotli($data)
 
     for ($level; $level <= $max; $level++) {
         $start = hrtime(true);
-        $newSize = strlen(brotli_compress($data, $level));
+        $newSize = strlen(brotli_compress($data, $level, $useTextMode ? BROTLI_TEXT : BROTLI_GENERIC));
         $ratio = 100 - round(($newSize / $originalLength) * 100, 3);
         $time = (hrtime(true) - $start) / 1e+6;
         $percentPerMs = $ratio / $time;
@@ -85,6 +89,7 @@ echo "Total size: " . strlen($data) / 1_048_576 . "mb" . PHP_EOL;
 testGzip($data);
 testZstd($data);
 testBrotli($data);
+testBrotli($data, true);
 
 echo PHP_EOL . PHP_EOL;
 
@@ -97,3 +102,4 @@ echo "Total size: " . strlen($data) / 1_048_576 . "mb" . PHP_EOL;
 testGzip($data);
 testZstd($data);
 testBrotli($data);
+testBrotli($data, true);
