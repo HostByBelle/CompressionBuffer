@@ -1,32 +1,23 @@
 <?php
 
-function compressWithGzip(string $data, int $level)
+function testGzip($data)
 {
-    return gzencode($data, $level, ZLIB_ENCODING_GZIP);
-}
-
-function compressWithZstd(string $data, int $level)
-{
-    return zstd_compress($data, $level);
-}
-
-function compressWithBrotli(string $data, int $level)
-{
-    return brotli_compress($data, $level);
-}
-
-function testGzip($file)
-{
-    $level = 1;
-    $max = 9;
-    $originalData = file_get_contents($file);
-    $originalLength = strlen($originalData);
-
+    echo PHP_EOL . PHP_EOL;
     echo '----GZIP----' . PHP_EOL;
     echo 'Level, Reduction, Time, Percent Per Millisecond' . PHP_EOL;
+
+    if (!function_exists('gzencode')) {
+        echo "The zlib extension is not installed, cannot test gzip." . PHP_EOL;
+        return;
+    }
+
+    $level = 1;
+    $max = 9;
+    $originalLength = strlen($data);
+
     for ($level; $level <= $max; $level++) {
         $start = hrtime(true);
-        $newSize = strlen(compressWithGzip($originalData, $level));
+        $newSize = strlen(gzencode($data, $level, ZLIB_ENCODING_GZIP));
         $ratio = 100 - round(($newSize / $originalLength) * 100, 3);
         $time = (hrtime(true) - $start) / 1e+6;
         $percentPerMs = $ratio / $time;
@@ -34,18 +25,24 @@ function testGzip($file)
     }
 }
 
-function testZstd($file)
+function testZstd($data)
 {
-    $level = 1;
-    $max = 19;
-    $originalData = file_get_contents($file);
-    $originalLength = strlen($originalData);
-
+    echo PHP_EOL . PHP_EOL;
     echo '----zstd----' . PHP_EOL;
     echo 'Level, Reduction, Time, Percent Per Millisecond' . PHP_EOL;
+
+    if (!function_exists('zstd_compress')) {
+        echo "The zstd extension is not installed, cannot test zstd." . PHP_EOL;
+        return;
+    }
+
+    $level = 1;
+    $max = 19;
+    $originalLength = strlen($data);
+
     for ($level; $level <= $max; $level++) {
         $start = hrtime(true);
-        $newSize = strlen(compressWithZstd($originalData, $level));
+        $newSize = strlen(zstd_compress($data, $level));
         $ratio = 100 - round(($newSize / $originalLength) * 100, 3);
         $time = (hrtime(true) - $start) / 1e+6;
         $percentPerMs = $ratio / $time;
@@ -53,18 +50,24 @@ function testZstd($file)
     }
 }
 
-function testBrotli($file)
+function testBrotli($data)
 {
-    $level = 1;
-    $max = 11;
-    $originalData = file_get_contents($file);
-    $originalLength = strlen($originalData);
-
+    echo PHP_EOL . PHP_EOL;
     echo '----Brotli----' . PHP_EOL;
     echo 'Level, Reduction, Time, Percent Per Millisecond' . PHP_EOL;
+
+    if (!function_exists('brotli_compress')) {
+        echo "The brotli extension is not installed, cannot test brotli." . PHP_EOL;
+        return;
+    }
+
+    $level = 1;
+    $max = 11;
+    $originalLength = strlen($data);
+
     for ($level; $level <= $max; $level++) {
         $start = hrtime(true);
-        $newSize = strlen(compressWithBrotli($originalData, $level));
+        $newSize = strlen(brotli_compress($data, $level));
         $ratio = 100 - round(($newSize / $originalLength) * 100, 3);
         $time = (hrtime(true) - $start) / 1e+6;
         $percentPerMs = $ratio / $time;
@@ -72,8 +75,25 @@ function testBrotli($file)
     }
 }
 
-$testFile = 'war_and_peace.html'; 
 
-testGzip($testFile);
-testZstd($testFile);
-testBrotli($testFile);
+echo "Retrieving the large test data (War and Peace e-book by Project Gutenberg)" . PHP_EOL;
+
+$data = file_get_contents('https://www.gutenberg.org/files/2600/2600-h/2600-h.htm');
+
+echo "Total size: " . strlen($data) / 1_048_576 . "mb" . PHP_EOL;
+
+testGzip($data);
+testZstd($data);
+testBrotli($data);
+
+echo PHP_EOL . PHP_EOL;
+
+echo "Retrieving the medium test data (Wikipedia page on Project Gutenberg)" . PHP_EOL;
+
+$data = file_get_contents('https://en.wikipedia.org/wiki/Project_Gutenberg');
+
+echo "Total size: " . strlen($data) / 1_048_576 . "mb" . PHP_EOL;
+
+testGzip($data);
+testZstd($data);
+testBrotli($data);

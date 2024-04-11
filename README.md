@@ -26,7 +26,6 @@ CompressionBuffer provides easy access to `zstd`, `brotli`, and `gzip` output bu
 ## Installation & Usage
 
 Install via composer:
-_Note_: CompressionBuffer isn't quite yet released, you'll have to use the `main` dev branch specifically.
 
 ```bash
 composer require hostbybelle/compressionbuffer
