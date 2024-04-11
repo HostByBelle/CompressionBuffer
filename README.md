@@ -29,7 +29,7 @@ Install via composer:
 _Note_: CompressionBuffer isn't quite yet released, you'll have to use the `main` dev branch specifically.
 
 ```bash
-composer install hostbybelle/compressionbuffer
+composer require hostbybelle/compressionbuffer
 ```
 
 Enabling in your application:
