@@ -56,6 +56,24 @@ class CompressionBuffer
     }
 
     /**
+     * Gets the full ordered list of compression methods detected as compatible with both the server and the client
+     *
+     * @return string[]
+     */
+    public static function getTryOrder(): array
+    {
+        return self::$tryOrder;
+    }
+
+    /**
+     * Returns the first-choice compression method that will be used.
+     */
+    public static function getFirstMethodChoice(): string
+    {
+        return self::$tryOrder[0];
+    }
+
+    /**
      * Must be called so CompressionBuffer can perform the needed checks and setup.
      * Once called, it will automatically find compatible compression methods for the client & server before then sorting them in a logical try order.
      *
@@ -87,7 +105,7 @@ class CompressionBuffer
                 return $buffer;
             }
 
-            // Attempt the compatible compression method(s) 
+            // Attempt the compatible compression method(s)
             foreach (self::$tryOrder as $encoding) {
                 try {
                     $compressed = self::doCompression($encoding, $buffer);
