@@ -120,9 +120,6 @@ class CompressionBuffer
                     }
                 }
             }
-
-            // We will return the original uncompressed content next, so tag the encoding as "identity"
-            self::sendHeader('Content-Encoding', 'identity');
         }
 
         return $buffer;
@@ -215,6 +212,11 @@ class CompressionBuffer
      */
     private static function sendHeader(string $name, string|int $value): void
     {
+        // We actually don't want to send a `Content-Encoding` header if the content isn't encoded as this behavior risks confusing the client.
+        if ($name === 'Content-Encoding' && $value === 'identity') {
+            return;
+        }
+
         if (is_callable(self::$headerHandler)) {
             call_user_func(self::$headerHandler, $name, $value);
         } else {
